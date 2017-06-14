@@ -1,0 +1,47 @@
+0.1.
+Obejrzyj plik Texture.h aby zapoznaæ siê z nowym interfejsem do obs³ugi tekstur.
+
+0.2. 
+W skomplikowanym projekcie ró¿ne typy obiektów rysuje siê przy u¿yciu ró¿nych shaderów, potrzebujemy zatem w programie architektury, która na to pozwala.
+Zosta³o to ju¿ czêœciowo wykonane. Obejrzyj zmodyfikowan¹ funkcjê renderScene(). Korzysta ona z nowych funkcji drawObjectColor() i drawObjectTexture() (zamiast jak wczeœniej drawObject()).
+Funkcja drawObjectColor() korzysta z shaderów shader_color.vert i shader_color.frag, a funkcja drawObjectTexture() - z shader_tex.vert i shader_tex.frag (patrz te¿: funkcja init()).
+W tym momencie zarówno treœæ obu funkcji, jak i shadery, s¹ identyczne. W zadaniach 1 i 2 nale¿y modyfikowaæ funkcjê drawObjectTexture() i shadery, z których korzysta, zaœ funkcja drawObjectColor() powinna zostaæ niezmieniona. Po takiej operacji funkcj¹ drawObjectColor() bêdzie mo¿na rysowaæ obiekty o jednolitym kolorze, a funkcj¹ drawObjectTexture - obiekty oteksturowane.
+ 
+ 
+1. Za³aduj teksturê:
+- Stwórz w kodzie C++ zmienn¹ globaln¹ o typie GLuint (typ zwracany funkcji Core::LoadTexture).
+- W funkcji init() przypisz wynik wykonania funkcji Core::LoadTexture do nowej zmiennej. Œcie¿ka do tekstury to: "textures/grid.png"
+- Zmodyfikuj listê parametrów funkcji drawObjectTexture() tak, aby przyjmowa³a jako ostatni parametr identyfikator tekstury, a nie wektor koloru
+
+
+2. Zmodyfikuj shader tak, aby nak³ada³ teksturê na obiekt:
+
+a) Przeœlij wspó³rzêdne mapowania tekstur z vertex shadera do fragment shadera
+- Wspo³rzêdne tekstur to kolejny (po pozycjach i wektorach normalnych) atrybut wierzcho³ków - s¹ dostêpne w vertex shaderze pod nazw¹ vertexTexCoord
+- Przeœlij je znanym ju¿ sposobem do fragment shadera (zmienna "out" w vertex shaderze i odpowiadaj¹ca jej zmienna "in" we fragment shaderze)
+
+b) Przeœlij teksturê do fragment shadera:
+- Stwórz zmienn¹ typu "uniform sampler2D" we fragment shaderze - analogicznie do innych zmiennych typu uniform, s³u¿y ona do przesy³ania informacji bezpoœrednio z kodu C++ do shadera
+- Po stronie kodu C++ u¿yj funkcji Core::SetActiveTexture aby ustawiæ zmienn¹ sampler2D na wczytan¹ wczeœniej teksturê
+
+c) U¿yj wartoœci uzyskanej z tekstury zamiast koloru (objectColor) do pokolorowania obiektu:
+- Wykonaj próbkowanie tekstury we wspó³rzêdnych otrzymanych przez fragment shader:  "vec4 textureColor = texture2D(nazwaZmiennejSampler2D, nazwaZmiennejWspolrzedneTekstury)" (vec4 zawiera kolor RGBA)
+- U¿yj pierwszych trzech wspó³rzêdnych (RGB) uzyskanego wektora jako nowego koloru bazowego piksela
+
+
+3. Pobaw siê mechanizmem teksturowania:
+- Przemnó¿ jedn¹ lub obie ze wspó³rzêdnych mapowania przez 5 i sprawdŸ co siê stanie
+- Wypróbuj pozosta³e tekstury: grid_color.png, earth.png i earth2.png.
+- Tekstury Ziemi wyœwietlaj¹ siê "do góry nogami". Napraw to.
+
+
+4. Teksturowanie proceduralne
+
+a) Stwórz trzeci¹ parê plików z shaderami (np. shader_proc_tex.vert i shader_proc_tex.frag), oraz trzeci¹ funkcjê drawObjectProceduralTexture i w nich zawrzyj kolejne modyfikacje
+
+b) Prostym sposobem proceduralnego teksturowania, jest uzale¿nienie koloru od pozycji piksela w przestrzeni lokalnej (u¿ycie przestrzeni œwiata spowodowa³oby, ¿e wzór na obiekcie zmienia³by siê przy poruszaniu go).
+- Przeœlij z vertex shadera do fragment shadera pozycjê wierzcho³ka w przestrzeni lokalnej (czyli tej, w której wyra¿one s¹ atrybuty wierzcho³ka - nie trzeba wiêc wykonywaæ ¿adnej transformacji macierzowej)
+- We fragment shaderze oblicz sinus wspó³rzêdnej y pozycji piksela
+- Je¿eli sinus jest wiêkszy od zera, to ustaw bazowy kolor obiektu na wybrany kolor, a jeœli jest mniejszy od zera, to na inny kolor
+- Mo¿esz przes³aæ te kolory przy u¿yciu zmiennych uniform z kodu C++ - pozwoli to rysowaæ ró¿ne obiekty z ró¿nymi parami kolorów
+- Poeksperymentuj z innymi metodami teksturowania proceduralnego podanymi na wyk³adzie
